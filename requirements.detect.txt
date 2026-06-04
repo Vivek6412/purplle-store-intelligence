@@ -1,0 +1,12 @@
+ultralytics==8.2.0
+opencv-python-headless==4.9.0.80
+torch==2.3.0
+torchvision==0.18.0
+shapely==2.0.4
+numpy==1.26.4
+requests==2.32.2
+python-dotenv==1.0.1
+tqdm==4.66.4
+onnx==1.16.1
+onnxruntime==1.17.1
+deepface==0.0.92

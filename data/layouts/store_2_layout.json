@@ -1,0 +1,122 @@
+[
+  {
+    "store_id": "ST1008",
+    "open_time": "09:00:00",
+    "close_time": "21:00:00",
+    "timezone": "Asia/Kolkata",
+    "zones": [
+      {
+        "zone_id": "PURPLLE_MUM_1076_Z01",
+        "parent_zone": "Left Shelf",
+        "polygon": [
+          [
+            0,
+            0
+          ],
+          [
+            400,
+            0
+          ],
+          [
+            400,
+            300
+          ],
+          [
+            0,
+            300
+          ]
+        ]
+      },
+      {
+        "zone_id": "PURPLLE_MUM_1076_Z02",
+        "parent_zone": "Center Display",
+        "polygon": [
+          [
+            400,
+            400
+          ],
+          [
+            600,
+            400
+          ],
+          [
+            600,
+            600
+          ],
+          [
+            400,
+            600
+          ]
+        ]
+      },
+      {
+        "zone_id": "PURPLLE_MUM_1076_Z03",
+        "parent_zone": "Lipstick Aisle",
+        "polygon": [
+          [
+            400,
+            700
+          ],
+          [
+            600,
+            700
+          ],
+          [
+            600,
+            900
+          ],
+          [
+            400,
+            900
+          ]
+        ]
+      },
+      {
+        "zone_id": "PURPLLE_MUM_1076_Z_BILLING_01",
+        "parent_zone": "Billing Counter Queue",
+        "polygon": [
+          [
+            1650,
+            300
+          ],
+          [
+            1900,
+            300
+          ],
+          [
+            1900,
+            800
+          ],
+          [
+            1650,
+            800
+          ]
+        ]
+      }
+    ],
+    "entry_threshold": {
+      "polygon": [
+        [
+          0,
+          800
+        ],
+        [
+          100,
+          800
+        ],
+        [
+          100,
+          1080
+        ],
+        [
+          0,
+          1080
+        ]
+      ],
+      "inside_direction": [
+        1.0,
+        0.0
+      ]
+    }
+  }
+]

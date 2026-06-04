@@ -1,0 +1,408 @@
+[
+  {
+    "store_id": "STORE_BLR_001",
+    "open_time": "09:00:00",
+    "close_time": "21:00:00",
+    "timezone": "Asia/Kolkata",
+    "zones": [
+      {
+        "zone_id": "Farm_stay",
+        "parent_zone": "SKINCARE",
+        "polygon": [
+          [
+            0,
+            0
+          ],
+          [
+            280,
+            0
+          ],
+          [
+            280,
+            1080
+          ],
+          [
+            0,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "THE_FACE_SHOP",
+        "parent_zone": "SKINCARE",
+        "polygon": [
+          [
+            280,
+            0
+          ],
+          [
+            600,
+            0
+          ],
+          [
+            600,
+            1080
+          ],
+          [
+            280,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "GOOD_VIBES",
+        "parent_zone": "SKINCARE",
+        "polygon": [
+          [
+            600,
+            0
+          ],
+          [
+            920,
+            0
+          ],
+          [
+            920,
+            1080
+          ],
+          [
+            600,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "derma_co",
+        "parent_zone": "SKINCARE",
+        "polygon": [
+          [
+            920,
+            0
+          ],
+          [
+            1220,
+            0
+          ],
+          [
+            1220,
+            1080
+          ],
+          [
+            920,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "Minimalist",
+        "parent_zone": "SKINCARE",
+        "polygon": [
+          [
+            1220,
+            0
+          ],
+          [
+            1480,
+            0
+          ],
+          [
+            1480,
+            1080
+          ],
+          [
+            1220,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "Aqualogica",
+        "parent_zone": "SKINCARE",
+        "polygon": [
+          [
+            1480,
+            0
+          ],
+          [
+            1780,
+            0
+          ],
+          [
+            1780,
+            1080
+          ],
+          [
+            1480,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "Foxtale",
+        "parent_zone": "SKINCARE",
+        "polygon": [
+          [
+            1780,
+            0
+          ],
+          [
+            1850,
+            0
+          ],
+          [
+            1850,
+            1080
+          ],
+          [
+            1780,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "JC",
+        "parent_zone": "SKINCARE",
+        "polygon": [
+          [
+            1850,
+            0
+          ],
+          [
+            1920,
+            0
+          ],
+          [
+            1920,
+            1080
+          ],
+          [
+            1850,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "ALPS",
+        "parent_zone": "MAKEUP",
+        "polygon": [
+          [
+            0,
+            0
+          ],
+          [
+            420,
+            0
+          ],
+          [
+            420,
+            1080
+          ],
+          [
+            0,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "MARS",
+        "parent_zone": "MAKEUP",
+        "polygon": [
+          [
+            420,
+            0
+          ],
+          [
+            680,
+            0
+          ],
+          [
+            680,
+            1080
+          ],
+          [
+            420,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "SWISS_BEAUTY",
+        "parent_zone": "MAKEUP",
+        "polygon": [
+          [
+            680,
+            0
+          ],
+          [
+            980,
+            0
+          ],
+          [
+            980,
+            1080
+          ],
+          [
+            680,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "LAKME",
+        "parent_zone": "MAKEUP",
+        "polygon": [
+          [
+            980,
+            0
+          ],
+          [
+            1300,
+            0
+          ],
+          [
+            1300,
+            1080
+          ],
+          [
+            980,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "FACESCANADA_Fac",
+        "parent_zone": "MAKEUP",
+        "polygon": [
+          [
+            1300,
+            0
+          ],
+          [
+            1580,
+            0
+          ],
+          [
+            1580,
+            1080
+          ],
+          [
+            1300,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "MAYBELLINE_Beaut",
+        "parent_zone": "MAKEUP",
+        "polygon": [
+          [
+            1580,
+            0
+          ],
+          [
+            1920,
+            0
+          ],
+          [
+            1920,
+            1080
+          ],
+          [
+            1580,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "Fragrance_NAIL_GONDOLA",
+        "parent_zone": "ISLAND",
+        "polygon": [
+          [
+            300,
+            600
+          ],
+          [
+            600,
+            600
+          ],
+          [
+            600,
+            1080
+          ],
+          [
+            300,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "MAKEUP_UNIT",
+        "parent_zone": "ISLAND",
+        "polygon": [
+          [
+            1500,
+            600
+          ],
+          [
+            1920,
+            600
+          ],
+          [
+            1920,
+            1080
+          ],
+          [
+            1500,
+            1080
+          ]
+        ]
+      },
+      {
+        "zone_id": "BILLING",
+        "parent_zone": null,
+        "polygon": [
+          [
+            0,
+            200
+          ],
+          [
+            600,
+            200
+          ],
+          [
+            600,
+            1080
+          ],
+          [
+            0,
+            1080
+          ]
+        ]
+      }
+    ],
+    "entry_threshold": {
+      "polygon": [
+        [
+          1200,
+          200
+        ],
+        [
+          1400,
+          200
+        ],
+        [
+          1400,
+          1080
+        ],
+        [
+          1200,
+          1080
+        ]
+      ],
+      "inside_direction": [
+        -1.0,
+        0.0
+      ]
+    }
+  }
+]

@@ -1,0 +1,89 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-store_intelligence}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-store_intelligence}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data:ro
+      - ./output:/app/output
+    env_file:
+      - .env
+    environment:
+      # Override localhost URLs from .env with Docker-internal service names
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/store_intelligence
+      REDIS_URL: redis://redis:6379
+    healthcheck:
+      # Using Python for healthcheck since curl is not in the system deps list
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  detect:
+    build:
+      context: .
+      dockerfile: Dockerfile.detect
+    volumes:
+      - ./data:/app/data:ro
+      - ./output:/app/output
+      - ./Project-requirements:/app/Project-requirements:ro
+    environment:
+      - STORE_LAYOUT_PATH=data/layouts
+      - OUTPUT_DIR=output
+    command: ["bash", "run.sh"]
+    depends_on:
+      - api
+
+  stream:
+    build:
+      context: .
+      dockerfile: Dockerfile.detect
+    volumes:
+      - ./output:/app/output:ro
+    environment:
+      - API_URL=http://api:8000/events/ingest
+    command: ["python", "stream_all.py"]
+    depends_on:
+      - api
+      - detect
+
+volumes:
+  pgdata:
+  redisdata:

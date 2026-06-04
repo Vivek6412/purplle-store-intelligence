@@ -1,0 +1,40 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+
+# Output and runtime state
+output/
+*.pt
+
+# AI Models
+yolov8s.onnx
+*.weights
+
+# Data and Videos
+data/clips/
+data/*.csv
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Testing and Coverage
+.coverage
+.pytest_cache/
+
+# Temporary and Log files
+clips_to_process.tmp
+scratch_log.txt
+temp_frames/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Documentation / Challenge files
+Project-requirements/

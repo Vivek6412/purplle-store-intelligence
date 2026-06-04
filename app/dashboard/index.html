@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Store Intelligence — Live Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --bg:        #0a0c0f;
+    --surface:   #111418;
+    --border:    #1e2329;
+    --border2:   #2a3040;
+    --text:      #c9d1d9;
+    --muted:     #6e7681;
+    --accent:    #00d4ff;
+    --accent2:   #00ff88;
+    --warn:      #ffa500;
+    --crit:      #ff4444;
+    --info:      #4488ff;
+    --grid-line: rgba(255,255,255,0.04);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, var(--grid-line) 39px, var(--grid-line) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, var(--grid-line) 39px, var(--grid-line) 40px);
+  }
+
+  /* ── Shell ── */
+  .shell {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .brand-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: #fff;
+    text-transform: uppercase;
+  }
+  .brand-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.1em;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .store-select-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .store-select-wrap label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.08em;
+  }
+  select#storeSelect {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    outline: none;
+  }
+  select#storeSelect:focus { border-color: var(--accent); }
+
+  /* ● LIVE indicator */
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+  .live-badge.connected { color: var(--accent2); }
+  .live-badge.disconnected { color: var(--crit); }
+
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s;
+  }
+  .live-badge.connected .live-dot {
+    background: var(--accent2);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  .live-badge.disconnected .live-dot { background: var(--crit); }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(0,255,136,0.5); }
+    50%      { box-shadow: 0 0 0 5px rgba(0,255,136,0); }
+  }
+
+  /* last-refresh */
+  #lastRefresh {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* ── KPI Cards ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent);
+    padding: 16px 18px 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 60px; height: 60px;
+    background: radial-gradient(circle at top right, rgba(0,212,255,0.06), transparent 70%);
+    pointer-events: none;
+  }
+  .kpi-card:nth-child(2) { border-top-color: var(--accent2); }
+  .kpi-card:nth-child(2)::after { background: radial-gradient(circle at top right, rgba(0,255,136,0.06), transparent 70%); }
+  .kpi-card:nth-child(3) { border-top-color: var(--warn); }
+  .kpi-card:nth-child(3)::after { background: radial-gradient(circle at top right, rgba(255,165,0,0.06), transparent 70%); }
+  .kpi-card:nth-child(4) { border-top-color: var(--crit); }
+  .kpi-card:nth-child(4)::after { background: radial-gradient(circle at top right, rgba(255,68,68,0.06), transparent 70%); }
+
+  .kpi-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .kpi-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 32px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1;
+    transition: color 0.4s;
+  }
+  .kpi-unit {
+    font-size: 14px;
+    color: var(--muted);
+    margin-left: 2px;
+  }
+
+  /* ── Main Grid ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px 18px;
+  }
+
+  .panel-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 10px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .chart-wrap {
+    position: relative;
+    height: 200px;
+  }
+
+  /* ── Bottom row: full-width panels ── */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* ── Anomalies ── */
+  #anomalyList { list-style: none; }
+  #anomalyList li {
+    padding: 10px 12px;
+    border-left: 3px solid var(--muted);
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.02);
+    font-size: 12px;
+  }
+  #anomalyList li.CRITICAL {
+    border-left-color: var(--crit);
+    background: rgba(255,68,68,0.06);
+  }
+  #anomalyList li.WARN {
+    border-left-color: var(--warn);
+    background: rgba(255,165,0,0.06);
+  }
+  #anomalyList li.INFO {
+    border-left-color: var(--info);
+    background: rgba(68,136,255,0.06);
+  }
+  .anomaly-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .anomaly-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: 600;
+  }
+  .CRITICAL .anomaly-badge { background: rgba(255,68,68,0.25); color: #ff8888; }
+  .WARN .anomaly-badge     { background: rgba(255,165,0,0.25);  color: #ffcc88; }
+  .INFO .anomaly-badge     { background: rgba(68,136,255,0.25); color: #88aaff; }
+  .anomaly-type {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .anomaly-action {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .no-anomalies {
+    color: var(--accent2);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    padding: 8px 0;
+  }
+
+  /* ── Live Feed ── */
+  #eventFeed {
+    list-style: none;
+    height: 260px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+  #eventFeed::-webkit-scrollbar { width: 4px; }
+  #eventFeed::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  #eventFeed li {
+    display: grid;
+    grid-template-columns: 68px 80px 1fr 80px;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    animation: fadeIn 0.3s ease;
+    align-items: center;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  .ev-time  { color: var(--muted); }
+  .ev-vid   { color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ev-type  { font-weight: 600; }
+  .ev-zone  { color: var(--muted); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .ev-type.ENTRY             { color: var(--accent2); }
+  .ev-type.EXIT              { color: #ff8888; }
+  .ev-type.ZONE_DWELL        { color: var(--warn); }
+  .ev-type.BILLING_QUEUE_JOIN   { color: #ff88ff; }
+  .ev-type.BILLING_QUEUE_ABANDON{ color: var(--crit); }
+  .ev-type.REENTRY           { color: #aaffcc; }
+  .ev-type.ZONE_ENTER,
+  .ev-type.ZONE_EXIT         { color: var(--text); }
+
+  /* ── API status banner ── */
+  #statusBanner {
+    display: none;
+    background: rgba(255,165,0,0.12);
+    border: 1px solid rgba(255,165,0,0.3);
+    color: var(--warn);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 8px 14px;
+    margin-bottom: 16px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Responsiveness ── */
+  @media (max-width: 900px) {
+    .kpi-row     { grid-template-columns: 1fr 1fr; }
+    .main-grid   { grid-template-columns: 1fr; }
+    .bottom-row  { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 500px) {
+    .kpi-row { grid-template-columns: 1fr; }
+    #eventFeed li { grid-template-columns: 60px 70px 1fr; }
+    .ev-zone { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <span class="brand-title">Store Intelligence</span>
+      <span class="brand-sub">// APEX RETAIL</span>
+    </div>
+    <div class="header-right">
+      <div class="store-select-wrap">
+        <label for="storeSelect">STORE</label>
+        <select id="storeSelect"><option value="">Loading...</option></select>
+      </div>
+      <div class="live-badge disconnected" id="liveBadge">
+        <div class="live-dot"></div>
+        <span id="liveLabel">CONNECTING</span>
+      </div>
+      <span id="lastRefresh"></span>
+    </div>
+  </header>
+
+  <!-- API status banner -->
+  <div id="statusBanner">⚠ Waiting for API at localhost:8000 — retrying...</div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Unique Visitors</div>
+      <div class="kpi-value" id="kvVisitors">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Conversion Rate</div>
+      <div class="kpi-value" id="kvConversion">—<span class="kpi-unit">%</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Queue Depth</div>
+      <div class="kpi-value" id="kvQueue">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Abandonment</div>
+      <div class="kpi-value" id="kvAbandon">—<span class="kpi-unit">%</span></div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="main-grid">
+    <div class="panel">
+      <div class="panel-title">Conversion Funnel</div>
+      <div class="chart-wrap"><canvas id="funnelChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Zone Heatmap</div>
+      <div class="chart-wrap"><canvas id="heatmapChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Bottom row -->
+  <div class="bottom-row">
+    <div class="panel">
+      <div class="panel-title">Active Anomalies</div>
+      <ul id="anomalyList"><li class="no-anomalies">Fetching data…</li></ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Live Event Feed</div>
+      <ul id="eventFeed"></ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+============================================================ */
+const API = '';   // same origin (served by FastAPI)
+let storeId = null;
+let evtSource = null;
+
+const REFRESH = { metrics: 30000, funnel: 60000, heatmap: 60000, anomalies: 15000 };
+const timers  = {};
+
+/* ============================================================
+   CHART SETUP
+============================================================ */
+Chart.defaults.color = '#6e7681';
+Chart.defaults.borderColor = '#1e2329';
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size = 11;
+
+const funnelChart = new Chart(document.getElementById('funnelChart'), {
+  type: 'bar',
+  data: {
+    labels: ['ENTRY', 'ZONE VISIT', 'BILLING', 'PURCHASE'],
+    datasets: [{
+      data: [0, 0, 0, 0],
+      backgroundColor: ['rgba(0,212,255,0.7)', 'rgba(0,212,255,0.55)', 'rgba(0,212,255,0.4)', 'rgba(0,255,136,0.7)'],
+      borderColor:     ['rgba(0,212,255,1)',   'rgba(0,212,255,0.8)',  'rgba(0,212,255,0.6)', 'rgba(0,255,136,1)'],
+      borderWidth: 1,
+      borderRadius: 2,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' } },
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, beginAtZero: true }
+    }
+  }
+});
+
+const heatmapChart = new Chart(document.getElementById('heatmapChart'), {
+  type: 'bar',
+  data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 0, borderRadius: 2 }] },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' }, beginAtZero: true, suggestedMax: 100 },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+/* ============================================================
+   LIVE INDICATOR
+============================================================ */
+function setLive(connected) {
+  const badge = document.getElementById('liveBadge');
+  const label = document.getElementById('liveLabel');
+  badge.className = 'live-badge ' + (connected ? 'connected' : 'disconnected');
+  label.textContent = connected ? 'LIVE' : 'RECONNECTING';
+}
+
+/* ============================================================
+   API STATUS BANNER
+============================================================ */
+function showBanner(show) {
+  document.getElementById('statusBanner').style.display = show ? 'block' : 'none';
+}
+
+/* ============================================================
+   FETCH HELPERS
+============================================================ */
+async function apiFetch(path) {
+  const res = await fetch(API + path);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+function fmt(v, decimals = 0) {
+  if (v === null || v === undefined) return '0';
+  return Number(v).toFixed(decimals);
+}
+
+/* ============================================================
+   METRICS
+============================================================ */
+async function refreshMetrics() {
+  if (!storeId) return;
+  try {
+    const d = await apiFetch(`/stores/${storeId}/metrics`);
+    showBanner(false);
+    document.getElementById('kvVisitors').textContent   = d.unique_visitors ?? 0;
+    document.getElementById('kvConversion').innerHTML   = fmt(d.conversion_rate * 100, 1) + '<span class="kpi-unit">%</span>';
+    document.getElementById('kvQueue').textContent      = d.queue_depth_current ?? 0;
+    document.getElementById('kvAbandon').innerHTML      = fmt(d.abandonment_rate * 100, 1) + '<span class="kpi-unit">%</span>';
+    document.getElementById('lastRefresh').textContent  = 'Updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    showBanner(true);
+  }
+}
+
+/* ============================================================
+   FUNNEL
+============================================================ */
+async function refreshFunnel() {
+  if (!storeId) return;
+  try {
+    const d = await apiFetch(`/stores/${storeId}/funnel`);
+    const counts = d.stages.map(s => s.count);
+    funnelChart.data.labels   = d.stages.map(s => s.stage);
+    funnelChart.data.datasets[0].data = counts;
+    funnelChart.update();
+  } catch (_) {}
+}
+
+/* ============================================================
+   HEATMAP
+============================================================ */
+async function refreshHeatmap() {
+  if (!storeId) return;
+  try {
+    const d = await apiFetch(`/stores/${storeId}/heatmap`);
+    const zones  = d.zones || [];
+    const labels = zones.map(z => z.zone_id);
+    const scores = zones.map(z => z.score);
+    // Color gradient: low score = dim blue, high score = vivid cyan
+    const colors = scores.map(s => {
+      const t = s / 100;
+      const r = Math.round(0 + t * 0);
+      const g = Math.round(100 + t * 156);
+      const b = Math.round(180 + t * 75);
+      return `rgba(${r},${g},${b},0.75)`;
+    });
+    heatmapChart.data.labels = labels;
+    heatmapChart.data.datasets[0].data = scores;
+    heatmapChart.data.datasets[0].backgroundColor = colors;
+    heatmapChart.update();
+  } catch (_) {}
+}
+
+/* ============================================================
+   ANOMALIES
+============================================================ */
+async function refreshAnomalies() {
+  if (!storeId) return;
+  try {
+    const d   = await apiFetch(`/stores/${storeId}/anomalies`);
+    const list = document.getElementById('anomalyList');
+    list.innerHTML = '';
+    if (!d.anomalies || d.anomalies.length === 0) {
+      list.innerHTML = '<li class="no-anomalies">No active anomalies ✓</li>';
+      return;
+    }
+    d.anomalies.forEach(a => {
+      const li = document.createElement('li');
+      li.className = a.severity;
+      li.innerHTML = `
+        <div class="anomaly-header">
+          <span class="anomaly-badge">${a.severity}</span>
+          <span class="anomaly-type">${a.anomaly_type}</span>
+        </div>
+        <div class="anomaly-action">${a.suggested_action || ''}</div>`;
+      list.appendChild(li);
+    });
+  } catch (_) {}
+}
+
+/* ============================================================
+   LIVE EVENT FEED
+============================================================ */
+const MAX_FEED = 20;
+function addFeedEvent(ev) {
+  const feed = document.getElementById('eventFeed');
+  const ts   = new Date(ev.timestamp).toLocaleTimeString('en-GB', { hour12: false });
+  const li   = document.createElement('li');
+  li.innerHTML = `
+    <span class="ev-time">${ts}</span>
+    <span class="ev-vid">${ev.visitor_id || '—'}</span>
+    <span class="ev-type ${ev.event_type}">${ev.event_type}</span>
+    <span class="ev-zone">${ev.zone_id || ''}</span>`;
+  feed.insertBefore(li, feed.firstChild);
+  while (feed.children.length > MAX_FEED) feed.removeChild(feed.lastChild);
+}
+
+/* ============================================================
+   SSE
+============================================================ */
+const TRIGGER_REFRESH_TYPES = new Set([
+  'ENTRY', 'EXIT', 'REENTRY', 'BILLING_QUEUE_JOIN', 'BILLING_QUEUE_ABANDON'
+]);
+
+function connectSSE() {
+  if (evtSource) { evtSource.close(); evtSource = null; }
+  if (!storeId) return;
+
+  evtSource = new EventSource(`${API}/events/stream/${storeId}`);
+
+  evtSource.onopen = () => setLive(true);
+
+  evtSource.onmessage = (e) => {
+    try {
+      const ev = JSON.parse(e.data);
+      addFeedEvent(ev);
+      // Trigger fast metric refresh on significant events
+      if (TRIGGER_REFRESH_TYPES.has(ev.event_type)) {
+        setTimeout(refreshMetrics, 500);
+      }
+    } catch (_) {}
+  };
+
+  evtSource.onerror = () => {
+    setLive(false);
+    // EventSource auto-reconnects natively
+  };
+}
+
+/* ============================================================
+   POLLING TIMERS
+============================================================ */
+function startPolling() {
+  Object.values(timers).forEach(clearInterval);
+  timers.metrics   = setInterval(refreshMetrics,   REFRESH.metrics);
+  timers.funnel    = setInterval(refreshFunnel,    REFRESH.funnel);
+  timers.heatmap   = setInterval(refreshHeatmap,   REFRESH.heatmap);
+  timers.anomalies = setInterval(refreshAnomalies, REFRESH.anomalies);
+}
+
+function loadAll() {
+  refreshMetrics();
+  refreshFunnel();
+  refreshHeatmap();
+  refreshAnomalies();
+  connectSSE();
+  startPolling();
+}
+
+/* ============================================================
+   STORE SELECTOR — populated from /health
+============================================================ */
+async function loadStores() {
+  try {
+    const h = await apiFetch('/health');
+    const sel = document.getElementById('storeSelect');
+    const ids  = Object.keys(h.stores || {});
+    showBanner(false);
+
+    if (ids.length === 0) {
+      sel.innerHTML = '<option value="">No stores found</option>';
+      return;
+    }
+
+    sel.innerHTML = ids.map(id => `<option value="${id}">${id}</option>`).join('');
+    storeId = ids[0];
+    sel.value = storeId;
+    loadAll();
+  } catch (_) {
+    showBanner(true);
+    // Retry until API is up
+    setTimeout(loadStores, 5000);
+  }
+}
+
+document.getElementById('storeSelect').addEventListener('change', function() {
+  storeId = this.value;
+  if (storeId) loadAll();
+});
+
+/* ============================================================
+   INIT
+============================================================ */
+loadStores();
+</script>
+</body>
+</html>
