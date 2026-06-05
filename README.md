@@ -45,7 +45,7 @@ End-to-end computer vision and analytics platform for offline retail stores. It 
 See `DESIGN.md` for a comprehensive architectural breakdown and `CHOICES.md` for our technical design decisions.
 
 ## Project Structure
-`	ext
+```text
 /store-intelligence/
 ├── pipeline/
 │   ├── detect.py
@@ -68,7 +68,7 @@ See `DESIGN.md` for a comprehensive architectural breakdown and `CHOICES.md` for
 ├── README.md
 ├── DESIGN.md
 └── CHOICES.md
-`
+```
 
 ## API Endpoints
 The backend provides robust analytics endpoints to drive the frontend dashboard:
