@@ -83,9 +83,13 @@ class ZoneClassifier:
 
     def classify(self, centroid: tuple[float, float]) -> tuple[Optional[str], Optional[str]]:
         pt = Point(centroid)
-        # Check specific product zones first
+        # BILLING is a priority zone — always check it first
+        billing = self.zones.get("BILLING")
+        if billing and billing["poly"].contains(pt):
+            return "BILLING", billing["parent_zone"]
+        # Check specific product zones
         for zone_id, data in self.zones.items():
-            if zone_id == "F.O.H":
+            if zone_id in ("F.O.H", "BILLING"):
                 continue
             if data["poly"].contains(pt):
                 return zone_id, data["parent_zone"]

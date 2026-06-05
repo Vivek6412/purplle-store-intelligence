@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.detect.txt .
-RUN pip install --no-cache-dir -r requirements.detect.txt
+RUN pip install --default-timeout=1000 --no-cache-dir -r requirements.detect.txt
 
 COPY detect.py tracker.py emit.py run.sh stream_all.py yolov8s.onnx ./
 

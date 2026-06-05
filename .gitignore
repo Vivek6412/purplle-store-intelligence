@@ -38,3 +38,8 @@ Thumbs.db
 
 # Documentation / Challenge files
 Project-requirements/
+
+# Temporary scripts and text files
+setup_folders.sh
+pdf_*.txt
+fix_layout.sql

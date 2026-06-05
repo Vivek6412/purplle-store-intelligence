@@ -14,7 +14,7 @@ from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter
 from sqlalchemy import func, select, cast, Date, text
 
-from app.db import AsyncSessionLocal, redis_client
+from app.db import AsyncSessionLocal, get_redis
 from app.models import Event, HealthResponse, StoreHealth, Store
 from app.config import get_settings
 
@@ -96,6 +96,7 @@ async def health() -> HealthResponse:
     # Redis check
     # ------------------------------------------------------------------
     try:
+        redis_client = await get_redis()
         if redis_client is None:
             raise RuntimeError("Redis client not initialised")
         await redis_client.ping()

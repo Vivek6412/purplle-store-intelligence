@@ -43,7 +43,6 @@ End-to-end computer vision and analytics platform for offline retail stores. It 
 
 ## Architecture
 See `DESIGN.md` for a comprehensive architectural breakdown and `CHOICES.md` for our technical design decisions.
-
 ## Project Structure
 ```text
 /store-intelligence/

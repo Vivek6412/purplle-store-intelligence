@@ -84,7 +84,7 @@ class EventEmitter:
                 "camera_id": self.camera_id,
                 "zone_id": zone_id,
                 "zone_name": zone_id,
-                "zone_type": "SHELF" if zone_id and zone_id != "BILLING" else "ZONE",
+                "zone_type": meta_payload.get("parent_zone", "SHELF") if zone_id and zone_id != "BILLING" else "ZONE",
                 "is_revenue_zone": "Yes" if zone_id and zone_id != "BILLING" else "No",
                 "event_time": timestamp_str,
                 "zone_hotspot_x": meta_payload.get("zone_hotspot_x"),

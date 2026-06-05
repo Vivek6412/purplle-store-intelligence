@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
 from app.db import get_db, get_redis
-from app.models import Event, Session, Store, FunnelStage, FunnelResponse
+from app.models import Event, Session, Store, FunnelStage, FunnelResponse, PosTransaction
 
 logger = logging.getLogger("store_intelligence")
 settings = get_settings()
